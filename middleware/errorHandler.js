@@ -1,6 +1,6 @@
 // Class for custom error handlers
 
-class ErrorHandler{
+class CustomErrorHandler{
     // Not found error
     static notFound(req, res, next) {
         const error = new Error(`Not Found - ${req.originalUrl}`);
@@ -18,7 +18,7 @@ class ErrorHandler{
             message = 'Resource not found';
         }
 
-        res.statusCode(statusCode).json({
+        res.status(statusCode).json({
             message,
             stack: process.env.NODE_ENV === 'development'? error.stack : null,
         })
@@ -26,4 +26,4 @@ class ErrorHandler{
     
 }
 
-module.exports = ErrorHandler;
+module.exports = CustomErrorHandler;
