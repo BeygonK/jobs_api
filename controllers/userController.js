@@ -7,15 +7,60 @@ class UsersController {
     // route    POST api/v1/user/register
     // @access  Public  
     static async register(req, res) {
-        
-        res.status(200).json({"message": "user registered"})
+        const { email, username, password } = req.body;
+
+        // check if user exists
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            res.status(400);
+            throw new Error('Email already exist!')
+        }
+
+        // hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // create new user
+        const newUser = await User.create({ email, username, password: hashedPassword });
+        if (newUser){
+            res.status(201).json({ 
+                _id: newUser._id,
+                email: newUser.email,
+                username: newUser.username,
+             });
+        } else {
+            res.status(400);
+            throw new Error('Failed to create user!')
+        }
     }
 
      // @desc    Auth login
     // route    POST api/v1/user/login
     // @access  Public  
     static async login(req, res) {
-        res.status(200).json({"message": "Login success"})
+        const { email, password } = req.body;
+
+        // check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            res.status(401);
+            throw new Error('Invalid credentials!')
+        }
+
+        // check if password is correct
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            res.status(401);
+            throw new Error('Invalid credentials!')
+        }
+
+        // create and send JWT token
+        // const token = user.getSignedJwtToken();
+
+        res.json({
+            _id: user._id,
+            email: user.email,
+            username: user.username,
+        });
     }
 
      // @desc    Auth logout
