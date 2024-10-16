@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const generateToken = require('../utils/generateToken');
+const redisClient = require('../utils/redis');
 
 // User class implementation
 class UsersController {
@@ -54,12 +56,18 @@ class UsersController {
         }
 
         // create and send JWT token
-        // const token = user.getSignedJwtToken();
+        const sessionId = `session:${user._id}`;
+        const token = generateToken(user._id);
+
+        // store token in Redis with an expiration time
+        await redisClient.setToken(sessionId, token, 3600); // 1 hour
 
         res.json({
             _id: user._id,
             email: user.email,
             username: user.username,
+            // send sessionId to frontend
+            sessionId,
         });
     }
 
@@ -67,7 +75,16 @@ class UsersController {
     // route    POST api/v1/user/logout
     // @access  private 
     static async logout(req, res) {
-        res.status(200).json({"message": "user created"})
+        const sessionId = req.headers['x-session-id'];
+        if (!sessionId) {
+            res.status(401);
+            throw new Error('No session found!')
+        }
+
+        // delete token from Redis
+        await redisClient.deleteToken(sessionId);
+
+        res.json({"message": "Logged out"})
     }
 
      // @desc    User Profile
