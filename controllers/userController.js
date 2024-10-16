@@ -91,14 +91,17 @@ class UsersController {
     // route    GET api/user/profile
     // @access  Private
     static async profile(req, res) {
-        res.status(200).json({"message": "user created"})
-    }
+            // Fetch the user from the database using the ID from the token
+            const user = await User.findById(req.user.userId).select('-password');  // Exclude password
 
-     // @desc    Update User profile
-    // route    PUT api/user/profile
-    // @access  Public  
-    static async updateProfile(req, res) {
-        res.status(200).json({"message": "user created"})
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                res.status(404);
+                throw new Error('User not found');
+            }
+
+        
     }
 }
 
