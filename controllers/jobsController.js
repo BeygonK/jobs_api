@@ -15,12 +15,12 @@ class JobController{
             location
         } = req.body;
 
-        const newJob = new Job(title,
+        const newJob = new Job({title,
             description,
             skillsRequired,
             jobType,
             jobLocation,
-            location);
+            location});
         if (newJob){
             await newJob.save();
             res.status(201).json(newJob);
@@ -82,3 +82,5 @@ class JobController{
         }
     }
 }
+
+module.exports = JobController;

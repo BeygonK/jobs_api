@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv').config();
 const dbConnection = require('./config/db');
 const user = require('./routes/user');
+const jobs = require('./routes/jobs');
 const CustomErrorHandler = require('./middleware/errorHandler')
 
 dbConnection();
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true}))
 
 app.use('/api/v1/user', user);
+app.use('/api/v1/jobs', jobs);
 
 // Error Handler middleware
 app.use(CustomErrorHandler.notFound);
