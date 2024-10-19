@@ -56,7 +56,7 @@ class UsersController {
         }
 
         // create and send JWT token
-        const sessionId = `session:${user._id}`;
+        const sessionId = `${user._id}`;
         const token = generateToken(user._id);
 
         // store token in Redis with an expiration time

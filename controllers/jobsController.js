@@ -8,35 +8,62 @@ class JobController{
     static async createJob(req, res) {
         const {
             title,
+            type,
+            location,
             description,
-            skillsRequired,
-            jobType,
-            jobLocation,
-            location
+            salary,
+            companyName,
+            companyDescription,
+            contactEmail,
+            contactPhone,
+            userId
         } = req.body;
-
-        const newJob = new Job({title,
-            description,
-            skillsRequired,
-            jobType,
-            jobLocation,
-            location});
-        if (newJob){
+    
+        try {
+            // Create a new job object using the data from the request
+            const newJob = new Job({
+                title,
+                type,
+                description,
+                location,
+                salary,
+                companyName,
+                companyDescription,
+                contactEmail,
+                contactPhone,
+                userId
+            });
+    
+            // Save the job to the database
             await newJob.save();
+    
+            // Return success response with the created job
             res.status(201).json(newJob);
-        }else {
-            res.status(400);
-            throw new Error('Failed to create job!')
+        } catch (error) {
+            res.status(400).json({ message: 'Failed to create job!', error: error.message });
+            console.log(error);
         }
     }
+    
 
     // @desc    Get all jobs
     // route    GET api/v1/jobs
     // @access  Public
     static async getAllJobs(req, res) {
-        const jobs = await Job.find({});
+        const limit = parseInt(req.query.limit) || 0; 
+        const { page }= req.query;
+        const skip = (page - 1) * limit;
+        const jobs = await Job.find().skip(skip).limit(limit).exec();
+
+        const totalJobs = await Job.countDocuments();
         if(jobs){
-            return res.status(200).json(jobs);
+            
+            return res.status(200).json({
+                jobs,
+                totalJobs,
+                totalPages: Math.ceil(totalJobs / limit), // Calculate total pages
+                currentPage: Number(page),
+        });
         } else{
             res.status(500);
             throw new Error('Server error!')
