@@ -1,8 +1,13 @@
-const { createClient } = require('redis');
+const redis = require('redis');
+
+const redisClient = redis.createClient({
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    password: process.env.REDIS_PASSWORD
+  });
 
 class RedisClient {
     constructor() {
-        this.client = createClient();
+        this.client = redisClient;
 
         // Handle Redis errors
         this.client.on('error', (err) => {
@@ -58,5 +63,4 @@ class RedisClient {
 }
 
 // Export an instance of RedisClient
-const redisClient = new RedisClient();
 module.exports = redisClient;
